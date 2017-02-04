@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2016 Cynara Krewe
+Copyright (c) 2017 Cynara Krewe
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software, hardware and associated documentation files (the "Solution"), to deal
@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOLUTION OR THE USE OR OTHER DEALINGS IN THE
 SOLUTION.
  */
 
+#include "flow/tm4c/frequency.h"
 #include "flow/tm4c/usb_cdc.h"
 
 #include "inc/hw_gpio.h"

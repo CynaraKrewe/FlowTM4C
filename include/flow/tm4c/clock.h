@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2016 Cynara Krewe
+Copyright (c) 2017 Cynara Krewe
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software, hardware and associated documentation files (the "Solution"), to deal
@@ -25,7 +25,7 @@ SOLUTION.
 #ifndef TM4C_CLOCK_H_
 #define TM4C_CLOCK_H_
 
-#include "flow/utility.h"
+#include "flow/tm4c/frequency.h"
 
 class Clock
 {
