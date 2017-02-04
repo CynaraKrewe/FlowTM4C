@@ -1,0 +1,6 @@
+*.txt
+*.pyc
+Debug
+Release
+/__pycache__/
+/library/
