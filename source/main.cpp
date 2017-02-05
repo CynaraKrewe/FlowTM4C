@@ -289,7 +289,7 @@ int main(void)
 	// Disconnect the components of the application.
 	for(unsigned int i = 0; i < ArraySizeOf(connections); i++)
 	{
-		delete connections[i];
+		Flow::disconnect(connections[i]);
 	}
 
 	// Destruct the components of the application.
