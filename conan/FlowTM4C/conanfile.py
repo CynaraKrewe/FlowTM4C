@@ -11,7 +11,7 @@ class FlowTM4C(ConanFile):
 	license = "MIT"
 	author = "Mathias Spiessens"
 	build_policy = "missing"
-	requires = "FlowCore/1.1@spiessensm/stable", "TM4C-usblib/2.1.3.156a@spiessensm/stable"
+	requires = "FlowCore/1.1@spiessensm/stable", "TM4C-usblib/2.1.4.178@spiessensm/stable"
 	
 	def source(self):
 		download("https://github.com/CynaraKrewe/FlowTM4C/archive/v1.0.zip", "FlowTM4C-1.0.zip")
