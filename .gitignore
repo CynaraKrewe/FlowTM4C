@@ -4,3 +4,4 @@ Debug
 Release
 /__pycache__/
 /library/
+/.launches/
