@@ -90,11 +90,13 @@ SECTIONS
     .bss (NOLOAD):
     {
         . = ALIGN(4);
-        _bss = .; 
-        *(.bss .bss*) 
+        _bss = .;
+        _bss_start__ = .;
+        *(.bss .bss*)
         *(COMMON)
-        . = ALIGN(4); 
-        _ebss = .; 
+        . = ALIGN(4);
+        _ebss = .;
+        _bss_end__ = .;
         . = ALIGN(8);
     } > ram
 

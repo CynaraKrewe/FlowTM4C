@@ -41,6 +41,8 @@ SOLUTION.
 #include "flow/tm4c/uart.h"
 #include "flow/tm4c/gpio.h"
 
+#include "driverlib/epi.h"
+
 enum Cookie
 {
 	COOKIE
@@ -52,6 +54,7 @@ class CookieJar
 public:
 	Flow::InPort<Tick> in;
 	Flow::OutPort<Cookie> out;
+
 	void run()
 	{
 		Tick tick;
@@ -68,6 +71,7 @@ class CookieMonster
 public:
 	Flow::InPort<Cookie> in;
 	Flow::OutPort<char> out;
+
 	void run()
 	{
 		Cookie cookie;
@@ -89,6 +93,7 @@ class Cylon
 public:
 	Flow::InPort<Tick> in;
 	Flow::OutPort<bool> out[outputs];
+
 	void run()
 	{
 		Tick tick;
@@ -127,9 +132,11 @@ public:
 		minimumPeriod(minimumPeriod),
 		maximumPeriod(maximumPeriod)
 	{}
+
 	Flow::InPort<bool> inIncrement;
 	Flow::InPort<bool> inDecrement;
 	Flow::OutPort<unsigned int> outPeriod;
+
 	void run()
 	{
 		bool increment;
@@ -176,6 +183,41 @@ private:
 static Flow::Component** _sysTickComponents = nullptr;
 static unsigned int _sysTickComponentsCount = 0;
 
+class EpiDemo
+:	public Flow::Component
+{
+public:
+	EpiDemo()
+	{
+		// Enable the EPI module.
+		SysCtlPeripheralEnable(SYSCTL_PERIPH_EPI0);
+
+		// Wait for the EPI module to be ready.
+		while(!SysCtlPeripheralReady(SYSCTL_PERIPH_EPI0));
+
+		// Set the EPI divider.
+		EPIDividerSet(EPI0_BASE, 120 - 1);
+
+		// Select GENERAL mode.
+		EPIModeSet(EPI0_BASE, EPI_MODE_GENERAL);
+
+		EPIConfigGPModeSet(EPI0_BASE, (EPI_GPMODE_CLKPIN | EPI_GPMODE_CLKGATE | EPI_GPMODE_WRITE2CYCLE | EPI_GPMODE_ASIZE_12 | EPI_GPMODE_DSIZE_16), 0, 0);
+
+		EPIAddressMapSet(EPI0_BASE, EPI_ADDR_PER_BASE_A | EPI_ADDR_PER_SIZE_64KB);
+	}
+
+	Flow::InPort<uint8_t> inByte;
+
+	void run()
+	{
+		uint8_t byte;
+		if(inByte.receive(byte))
+		{
+			*(uint8_t*)0xA0000000 = byte;
+		}
+	}
+};
+
 int main(void)
 {
 	// Set up the clock circuit.
@@ -189,7 +231,7 @@ int main(void)
 	DigitalInput* switch2 = new DigitalInput(Gpio::Name{Gpio::Port::J, 1});
 	PeriodConfigurator* periodConfiguator = new PeriodConfigurator(200, 50, 1600);
 	Timer* timer = new Timer();
-	Split<Tick, 2>* tickSplit = new Split<Tick, 2>();
+	Split<Tick, 3>* tickSplit = new Split<Tick, 3>();
 
 	Toggle* periodToggle = new Toggle();
 	DigitalOutput* periodCheck = new DigitalOutput(Gpio::Name{Gpio::Port::D, 2});
@@ -210,6 +252,10 @@ int main(void)
 	PWM* pwmP = new PWM(PWM::Divider::_64);
 
 	UartTransmitter* uat = new UartTransmitter(Uart::Number::_0);
+
+	UpDownCounter<Tick>* counterEpiDemo = new UpDownCounter<Tick>(0, 0xFF, 0);
+	Convert<unsigned int, uint8_t>* convertEpiDemo = new Convert<unsigned int, uint8_t>();
+	EpiDemo* epiDemo = new EpiDemo();
 
 	// Connect the components of the application.
 	Flow::Connection* connections[] =
@@ -237,7 +283,11 @@ int main(void)
 		Flow::connect(timerP->outTick, counterP->in),
 		Flow::connect(counterP->out, convertP->inFrom),
 		Flow::connect(1 kHz, pwmP->inFrequencyGenerator[0]),
-		Flow::connect(convertP->outTo, pwmP->inDutyCycleOutput[0])
+		Flow::connect(convertP->outTo, pwmP->inDutyCycleOutput[0]),
+
+		Flow::connect(tickSplit->out[2], counterEpiDemo->in),
+		Flow::connect(counterEpiDemo->out, convertEpiDemo->inFrom),
+		Flow::connect(convertEpiDemo->outTo, epiDemo->inByte)
 	};
 
 	// Define the deployment of the components.
@@ -264,6 +314,10 @@ int main(void)
 		convertP,
 		counterP,
 		pwmP,
+
+		counterEpiDemo,
+		convertEpiDemo,
+		epiDemo,
 
 		uat
 	};
