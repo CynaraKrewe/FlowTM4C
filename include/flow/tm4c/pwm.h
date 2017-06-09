@@ -30,7 +30,7 @@ SOLUTION.
 
 #include "driverlib/pwm.h"
 
-class PWM
+class Pwm
 :	public Flow::Component
 {
 public:
@@ -77,8 +77,8 @@ public:
 		_7 = PWM_OUT_7
 	};
 
-	PWM(Divider divider);
-	~PWM();
+	Pwm(Divider divider, Frequency generatorFrequency[GENERATOR_COUNT]);
+	~Pwm();
 
 	void run() final override;
 

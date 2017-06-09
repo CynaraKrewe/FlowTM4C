@@ -30,7 +30,7 @@ SOLUTION.
 #include "driverlib/debug.h"
 #include "driverlib/sysctl.h"
 
-PWM::PWM(Divider divider)
+Pwm::Pwm(Divider divider, Frequency generatorFrequency[GENERATOR_COUNT])
 {
 	SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM0);
 
@@ -45,12 +45,15 @@ PWM::PWM(Divider divider)
 				| PWM_GEN_MODE_FAULT_NO_MINPER | PWM_GEN_MODE_FAULT_LEGACY);
 
 		PWMGenEnable(PWM0_BASE, (uint32_t)GENERATOR[g]);
+
+		uint16_t value = (uint16_t)(inputClockFrequency / generatorFrequency[g]);
+		PWMGenPeriodSet(PWM0_BASE, (uint32_t)GENERATOR[g], value);
 	}
 
 	inputClockFrequency = (Frequency)Clock::instance()->getFrequency() / decodeDivider(divider);
 }
 
-PWM::~PWM()
+Pwm::~Pwm()
 {
 	for(unsigned int g = 0; g < GENERATOR_COUNT; g++)
 	{
@@ -58,17 +61,10 @@ PWM::~PWM()
 	}
 }
 
-void PWM::run()
+void Pwm::run()
 {
 	for(unsigned int g = 0; g < GENERATOR_COUNT; g++)
 	{
-		Frequency frequency;
-		if(inFrequencyGenerator[g].receive(frequency))
-		{
-			uint16_t value = (uint16_t)(inputClockFrequency / frequency);
-			PWMGenPeriodSet(PWM0_BASE, (uint32_t)GENERATOR[g], value);
-		}
-
 		unsigned int outputOffset = g * OUTPUT_FOR_GENERATOR;
 
 		for(unsigned int o = 0; o < OUTPUT_FOR_GENERATOR; o++)
@@ -88,7 +84,7 @@ void PWM::run()
 	}
 }
 
-unsigned int PWM::decodeDivider(Divider divider)
+unsigned int Pwm::decodeDivider(Divider divider)
 {
 	unsigned int decoded = 1;
 
@@ -120,22 +116,22 @@ unsigned int PWM::decodeDivider(Divider divider)
 	return decoded;
 }
 
-const PWM::Generator PWM::GENERATOR[GENERATOR_COUNT] =
+const Pwm::Generator Pwm::GENERATOR[GENERATOR_COUNT] =
 {
-	PWM::Generator::_0,
-	PWM::Generator::_1,
-	PWM::Generator::_2,
-	PWM::Generator::_3
+	Pwm::Generator::_0,
+	Pwm::Generator::_1,
+	Pwm::Generator::_2,
+	Pwm::Generator::_3
 };
 
-const PWM::Output PWM::OUTPUT[OUTPUT_COUNT] =
+const Pwm::Output Pwm::OUTPUT[OUTPUT_COUNT] =
 {
-	PWM::Output::_0,
-	PWM::Output::_1,
-	PWM::Output::_2,
-	PWM::Output::_3,
-	PWM::Output::_4,
-	PWM::Output::_5,
-	PWM::Output::_6,
-	PWM::Output::_7
+	Pwm::Output::_0,
+	Pwm::Output::_1,
+	Pwm::Output::_2,
+	Pwm::Output::_3,
+	Pwm::Output::_4,
+	Pwm::Output::_5,
+	Pwm::Output::_6,
+	Pwm::Output::_7
 };
