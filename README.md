@@ -4,7 +4,7 @@
 
 Demo application using Flow on the Texas Instruments EK-TM4C129EXL launchpad. The application includes GPIO, UART, PWM and USB device (CDC).
 
-###Getting started
+### Getting started
 
 1. Install dependencies:
 `$ sudo apt-get install build-essential gcc-arm-none-eabi`
