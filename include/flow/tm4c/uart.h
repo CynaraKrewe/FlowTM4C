@@ -49,35 +49,30 @@ public:
 		COUNT
 	};
 
-protected:
-	Uart(Number uartNumber);
+	enum class Baudrate : uint8_t
+	{
+		_9600 = 0,
+		_19200,
+		_38400,
+		_76800,
+		_115200,
+		COUNT
+	};
 
+	Flow::OutPort<char> out;
+	Flow::InPort<char> in;
+
+	Uart(Number uartNumber, Baudrate baudRate = Baudrate::_9600);
+
+	void run() final override;
+
+protected:
 	const Number uartNumber;
+	const Baudrate baudRate;
 
 	static const uint32_t sysCtlPeripheral[(uint8_t)Number::COUNT];
 	static const uint32_t uartBase[(uint8_t)Number::COUNT];
-};
-
-class UartReceiver
-:	public Uart
-{
-public:
-	Flow::OutPort<char> out;
-
-	UartReceiver(Uart::Number uartNumber);
-
-	void run() final override;
-};
-
-class UartTransmitter
-:	public Uart
-{
-public:
-	Flow::InPort<char> in;
-
-	UartTransmitter(Uart::Number uartNumber);
-
-	void run() final override;
+	static const uint32_t uartBaudrate[(uint8_t)Baudrate::COUNT];
 };
 
 #endif // TM4C_UART_H_

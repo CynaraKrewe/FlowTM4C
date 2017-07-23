@@ -28,15 +28,17 @@ SOLUTION.
 #include "driverlib/debug.h"
 #include "driverlib/uart.h"
 
-Uart::Uart(Uart::Number uartNumber)
-:	uartNumber(uartNumber)
+Uart::Uart(Uart::Number uartNumber, Uart::Baudrate baudRate)
+:	uartNumber(uartNumber),
+	baudRate(baudRate)
 {
 	ASSERT(uartNumber < Uart::Number::COUNT);
+	ASSERT(baudRate < Uart::Baudrate::COUNT);
 
 	SysCtlPeripheralEnable(sysCtlPeripheral[(uint8_t)uartNumber]);
 
 	Frequency coreFrequency = Clock::instance()->getFrequency();
-	UARTConfigSetExpClk(uartBase[(uint8_t)uartNumber], coreFrequency, 115200,
+	UARTConfigSetExpClk(uartBase[(uint8_t)uartNumber], coreFrequency, uartBaudrate[(uint8_t)baudRate],
 								(UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
 								 UART_CONFIG_PAR_NONE));
 	UARTFIFOEnable(uartBase[(uint8_t)uartNumber]);
@@ -67,32 +69,32 @@ const uint32_t Uart::uartBase[] =
 	UART7_BASE
 };
 
-UartReceiver::UartReceiver(Uart::Number uartNumber)
-:	Uart(uartNumber)
-{}
+const uint32_t Uart::uartBaudrate[] =
+{
+	9600,
+	19200,
+	38400,
+	76800,
+	115200
+};
 
-void UartReceiver::run()
+void Uart::run()
 {
 	// Loop while there are characters in the receive FIFO.
 	while(UARTCharsAvail(uartBase[(uint8_t)uartNumber]))
 	{
-		// Read the next character from the UART and write it back to the UART.
+		// Read the next character from the UART.
 		char received = UARTCharGetNonBlocking(uartBase[(uint8_t)uartNumber]);
 		if(received >= 0)
 		{
 			out.send(received);
 		}
 	}
-}
 
-UartTransmitter::UartTransmitter(Uart::Number uartNumber)
-:	Uart(uartNumber)
-{}
-
-void UartTransmitter::run()
-{
 	char toTransmit;
-	while(UARTSpaceAvail(uartBase[(uint8_t)uartNumber]) && in.receive(toTransmit)) // Transmit FIFO not full?
+
+	// Transmit FIFO not full?
+	while(UARTSpaceAvail(uartBase[(uint8_t)uartNumber]) && in.receive(toTransmit))
 	{
 		UARTCharPut(uartBase[(uint8_t)uartNumber], toTransmit);
 	}
