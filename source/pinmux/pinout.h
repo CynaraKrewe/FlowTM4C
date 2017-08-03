@@ -36,8 +36,8 @@
 //
 //*****************************************************************************
 
-// This file was automatically generated on 25-4-2017 at 19:55:11
-// by TI PinMux version 4.0.1483 
+// This file was automatically generated on 19-7-2017 at 16:45:51
+// by TI PinMux version 4.0.1492
 //
 //*****************************************************************************
 
