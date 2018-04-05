@@ -1,11 +1,9 @@
 from conans import ConanFile
 
-class ExampleUsingFlowTM4C(ConanFile):
-   requires = "FlowTM4C/1.2@spiessensm/stable"
+class Flow(ConanFile):
+   requires = "Flow/1.5@spiessensm/stable", "TM4C-usblib/2.1.4.178@spiessensm/stable"
    
    def imports(self):
       self.copy("*.h")
       self.copy("*.cpp")
       self.copy("*.a")
-      self.copy(".project")
-      self.copy(".cproject")

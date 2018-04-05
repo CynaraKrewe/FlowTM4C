@@ -1,25 +1,24 @@
-/*
- The MIT License (MIT)
-
- Copyright (c) 2017 Cynara Krewe
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software, hardware and associated documentation files (the "Solution"), to deal
- in the Solution without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Solution, and to permit persons to whom the Solution is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Solution.
-
- THE SOLUTION IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOLUTION OR THE USE OR OTHER DEALINGS IN THE
- SOLUTION.
+/* The MIT License (MIT)
+ *
+ * Copyright (c) 2018 Cynara Krewe
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software, hardware and associated documentation files (the "Solution"), to deal
+ * in the Solution without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Solution, and to permit persons to whom the Solution is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Solution.
+ *
+ * THE SOLUTION IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOLUTION OR THE USE OR OTHER DEALINGS IN THE
+ * SOLUTION.
  */
 
 #include <limits.h>
@@ -44,10 +43,9 @@
 #include "flow/tm4c/gpio.h"
 
 static Flow::Component** _sysTickComponents = nullptr;
-
 static unsigned int _sysTickComponentsCount = 0;
 
-class ConvertTemperature: public Flow::Component
+class ConvertTemperature : public Flow::Component
 {
 public:
 	Flow::InPort<uint32_t> in;
@@ -57,18 +55,15 @@ public:
 	{
 		uint32_t temperatureCounts;
 
-		if (in.receive(temperatureCounts))
+		if(in.receive(temperatureCounts))
 		{
-
-			float temperatureCelcius = (147.5f - ( ( (75*3.3f) * temperatureCounts) / 4096 ));
+			float temperatureCelcius = (147.5f - (((75 * 3.3f) * temperatureCounts) / 4096));
 			out.send(temperatureCelcius);
-
 		}
 	}
 };
 
-
-class ConvertVoltage: public Flow::Component
+class ConvertVoltage : public Flow::Component
 {
 public:
 	Flow::InPort<uint32_t> in;
@@ -78,19 +73,15 @@ public:
 	{
 		uint32_t voltageCounts;
 
-		if (in.receive(voltageCounts))
+		if(in.receive(voltageCounts))
 		{
-
-			float adcVoltage = ( voltageCounts / 4096.0f ) * 3.3f;
+			float adcVoltage = (voltageCounts / 4096.0f) * 3.3f;
 			out.send(adcVoltage);
-
 		}
 	}
 };
 
-
-
-class DrawFrame: public Flow::Component
+class DrawFrame : public Flow::Component
 {
 public:
 	Flow::InPort<Tick> tick;
@@ -106,10 +97,7 @@ public:
 
 	void run()
 	{
-
 		char TerminalBuffer[400];
-		Tick t;
-
 
 		float varADC9;
 		float varADC0;
@@ -118,67 +106,64 @@ public:
 		float varADC3;
 		float varCpuTemp;
 
-
+		Tick t;
 		if(tick.receive(t))
 		{
-		sprintf(&TerminalBuffer[0], "\f#### Sample nummer: %8u\n\r", samplenr);
+			sprintf(&TerminalBuffer[0], "\f#### Sample nummer: %8u\n\r", samplenr);
 
-		uint8_t length = strlen(TerminalBuffer);
+			uint8_t length = strlen(TerminalBuffer);
 
-		if (inADC9.receive(varADC9))
-		{
-			sprintf(&TerminalBuffer[length], "#  V AIN9: %0.3f V\n\r", varADC9);
+			if(inADC9.receive(varADC9))
+			{
+				sprintf(&TerminalBuffer[length], "#  V AIN9: %0.3f V\n\r", varADC9);
+			}
+
+			length = strlen(TerminalBuffer);
+
+			if(inADC0.receive(varADC0))
+			{
+				sprintf(&TerminalBuffer[length], "#  V AIN0: %0.3f V\n\r", varADC0);
+			}
+
+			length = strlen(TerminalBuffer);
+
+			if(inADC1.receive(varADC1))
+			{
+				sprintf(&TerminalBuffer[length], "#  V AIN1: %0.3f V\n\r", varADC1);
+			}
+
+			length = strlen(TerminalBuffer);
+
+			if(inADC2.receive(varADC2))
+			{
+				sprintf(&TerminalBuffer[length], "#  V AIN2: %0.3f V\n\r", varADC2);
+			}
+
+			length = strlen(TerminalBuffer);
+
+			if(inADC3.receive(varADC3))
+			{
+				sprintf(&TerminalBuffer[length], "#  V AIN3: %0.3f V\n\r", varADC3);
+			}
+
+			length = strlen(TerminalBuffer);
+
+			if(inCpuTemp.receive(varCpuTemp))
+			{
+				sprintf(&TerminalBuffer[length], "#  T CPU_CORE: %0.3f *C\n\r", varCpuTemp);
+			}
+			samplenr++;
+
+			for(unsigned int i = 0; i < strlen(TerminalBuffer); i++)
+			{
+				out.send(TerminalBuffer[i]);
+			}
 		}
-
-		length = strlen(TerminalBuffer);
-
-		if (inADC0.receive(varADC0))
-		{
-			sprintf(&TerminalBuffer[length], "#  V AIN0: %0.3f V\n\r", varADC0);
-		}
-
-		length = strlen(TerminalBuffer);
-
-		if (inADC1.receive(varADC1))
-		{
-			sprintf(&TerminalBuffer[length], "#  V AIN1: %0.3f V\n\r", varADC1);
-		}
-
-		length = strlen(TerminalBuffer);
-
-		if (inADC2.receive(varADC2))
-		{
-			sprintf(&TerminalBuffer[length], "#  V AIN2: %0.3f V\n\r", varADC2);
-		}
-
-		length = strlen(TerminalBuffer);
-
-		if (inADC3.receive(varADC3))
-		{
-			sprintf(&TerminalBuffer[length], "#  V AIN3: %0.3f V\n\r", varADC3);
-		}
-
-		length = strlen(TerminalBuffer);
-
-		if (inCpuTemp.receive(varCpuTemp))
-		{
-			sprintf(&TerminalBuffer[length], "#  T CPU_CORE: %0.3f *C\n\r", varCpuTemp);
-		}
-		samplenr++;
-
-		for (int i = 0; i < strlen(TerminalBuffer); i++)
-		{
-			out.send(TerminalBuffer[i]);
-		}
-		}
-
-
 	}
+
 private:
-	uint32_t samplenr = 0;
+	unsigned int samplenr = 0;
 };
-
-
 
 int main(void)
 {
@@ -205,7 +190,7 @@ int main(void)
 
 	Timer* timerP = new Timer(20 /*ms*/);
 	UpDownCounter<Tick>* counterP = new UpDownCounter<Tick>(0, 50, 0);
-	Convert<unsigned int, float>* convertP = new Convert<unsigned int, float>();
+	Convert<uint32_t, float>* convertP = new Convert<uint32_t, float>();
 	Frequency pwmFrequency[4] =	{ 1 kHz, 0, 0, 0 };
 
 	Pwm* pwmP = new Pwm(Pwm::Divider::_64, pwmFrequency);
@@ -221,13 +206,12 @@ int main(void)
 
 	Timer* timer1 = new Timer(100 /*ms*/);
 
-// Connect the components of the application.
+	// Connect the components of the application.
 	Flow::Connection* connections[] =
-
 	{
 		Flow::connect(cdc->out, cdc->in, 40),
 
-		Flow::connect(timer1->outTick,splitTick->in),
+		Flow::connect(timer1->outTick, splitTick->in),
 		Flow::connect(splitTick->out[0], toggleLed[0].tick),
 		Flow::connect(toggleLed[0].out, led0->inValue),
 		Flow::connect(splitTick->out[1], toggleLed[1].tick),
@@ -246,23 +230,19 @@ int main(void)
 		Flow::connect(adc1->sampleAin2, convertVoltage3->in),
 		Flow::connect(adc1->sampleAin3, convertVoltage4->in),
 
-		Flow::connect(convertTemperature->out,drawFrame->inCpuTemp),
-		Flow::connect(convertVoltage0->out,drawFrame->inADC9),
-		Flow::connect(convertVoltage1->out,drawFrame->inADC0),
-		Flow::connect(convertVoltage2->out,drawFrame->inADC1),
-		Flow::connect(convertVoltage3->out,drawFrame->inADC2),
-		Flow::connect(convertVoltage4->out,drawFrame->inADC3),
+		Flow::connect(convertTemperature->out, drawFrame->inCpuTemp),
+		Flow::connect(convertVoltage0->out, drawFrame->inADC9),
+		Flow::connect(convertVoltage1->out, drawFrame->inADC0),
+		Flow::connect(convertVoltage2->out, drawFrame->inADC1),
+		Flow::connect(convertVoltage3->out, drawFrame->inADC2),
+		Flow::connect(convertVoltage4->out, drawFrame->inADC3),
 
-		Flow::connect(splitTick->out[3],drawFrame->tick),
+		Flow::connect(splitTick->out[3], drawFrame->tick),
 		Flow::connect(drawFrame->out, uart0->in, 400),
-
 	};
-
-
 
 	// Define the deployment of the components.
 	Flow::Component* mainComponents[] =
-
 	{
 		splitTick,
 		led0,
@@ -288,12 +268,13 @@ int main(void)
 	};
 
 	Flow::Component* sysTickComponents[] =
-	{ timer1, timerP };
-
+	{
+		timer1,
+		timerP
+	};
 
 	_sysTickComponents = sysTickComponents;
 	_sysTickComponentsCount = ArraySizeOf(sysTickComponents);
-
 
 	// Run the application.
 	while(true)
@@ -303,11 +284,6 @@ int main(void)
 			mainComponents[c]->run();
 		}
 	}
-
-
-//////
-// The following code can be used an example
-//////
 
 	// Disconnect the components of the application.
 	for(unsigned int i = 0; i < ArraySizeOf(connections); i++)
