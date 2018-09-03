@@ -24,4 +24,5 @@ class FlowTM4C(ConanFile):
 
 	def package(self):
 		self.copy("*.h", "include/flow/driver", "FlowTM4C/include/flow/driver")
-		self.copy("*.cpp", "source/flow/driver", "FlowTM4C/source/flow/driver")
+		self.copy("*.h", "include/flow/tm4c", "FlowTM4C/include/flow/tm4c")
+		self.copy("*.cpp", "source/flow/tm4c", "FlowTM4C/source/flow/tm4c")
