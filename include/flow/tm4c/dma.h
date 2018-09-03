@@ -21,21 +21,26 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_CLOCK_H_
-#define FLOW_TM4C_CLOCK_H_
+#ifndef FLOW_TM4C_DMA_H_
+#define FLOW_TM4C_DMA_H_
 
-#include "flow/driver/clock.h"
+#include <stdint.h>
 
 namespace Flow {
 namespace TM4C {
 
-class Clock : public Flow::Driver::Clock<Clock>
+class DMA
 {
 public:
-	void configure(Frequency frequency) final override;
+    static void enable();
+
+private:
+    DMA();
+
+    uint8_t uDmaControlTable[1024] __attribute__ ((aligned(1024)));
 };
 
 } // namespace TM4C
 } // namespace Flow
 
-#endif /* FLOW_TM4C_CLOCK_H_ */
+#endif /* FLOW_TM4C_DMA_H_ */

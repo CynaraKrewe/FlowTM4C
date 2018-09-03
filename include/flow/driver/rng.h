@@ -21,21 +21,26 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_CLOCK_H_
-#define FLOW_TM4C_CLOCK_H_
+#ifndef FLOW_DRIVER_RNG_H_
+#define FLOW_DRIVER_RNG_H_
 
-#include "flow/driver/clock.h"
+#include "flow/flow.h"
 
 namespace Flow {
-namespace TM4C {
+namespace Driver {
 
-class Clock : public Flow::Driver::Clock<Clock>
+/**
+ * \brief Random number generator.
+ */
+class RNG : public Flow::Component
 {
 public:
-	void configure(Frequency frequency) final override;
+	Flow::InOutPort<uint64_t> inOutRandom{this};
+
+	virtual ~RNG(){}
 };
 
-} // namespace TM4C
+} // namespace Driver
 } // namespace Flow
 
-#endif /* FLOW_TM4C_CLOCK_H_ */
+#endif /* FLOW_DRIVER_RNG_H_ */

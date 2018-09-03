@@ -21,21 +21,23 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_CLOCK_H_
-#define FLOW_TM4C_CLOCK_H_
+#ifndef FLOW_DRIVER_RTC_H_
+#define FLOW_DRIVER_RTC_H_
 
-#include "flow/driver/clock.h"
+#include "isr.h"
 
 namespace Flow {
-namespace TM4C {
+namespace Driver {
 
-class Clock : public Flow::Driver::Clock<Clock>
+class RTC : public Flow::Component, public WithISR
 {
 public:
-	void configure(Frequency frequency) final override;
+	Flow::OutPort<Tick> outTick;
+
+	virtual ~RTC(){}
 };
 
-} // namespace TM4C
+} // namespace Driver
 } // namespace Flow
 
-#endif /* FLOW_TM4C_CLOCK_H_ */
+#endif /* FLOW_DRIVER_RTC_H_ */

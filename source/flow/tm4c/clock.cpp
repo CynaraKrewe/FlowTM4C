@@ -28,8 +28,8 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/systick.h"
 
-Clock::Clock()
-{}
+namespace Flow {
+namespace TM4C {
 
 void Clock::configure(Frequency frequency)
 {
@@ -45,19 +45,5 @@ void Clock::configure(Frequency frequency)
 	SysTickEnable();
 }
 
-Frequency Clock::getFrequency()
-{
-	return frequency;
-}
-
-Clock* Clock::instance()
-{
-	if(_instance == nullptr)
-	{
-		_instance = new Clock();
-	}
-
-	return _instance;
-}
-
-Clock* Clock::_instance = nullptr;
+} // namespace TM4C
+} // namespace Flow

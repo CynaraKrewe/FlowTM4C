@@ -21,77 +21,29 @@
  * SOLUTION.
  */
 
-#ifndef TM4C_GPIO_H_
-#define TM4C_GPIO_H_
+#include "flow/tm4c/dma.h"
 
-#include "flow/flow.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/udma.h"
 
-class Gpio
+namespace Flow {
+namespace TM4C {
+
+void DMA::enable()
 {
-public:
-	enum class Port : uint8_t
-	{
-		A = 'A',
-		B = 'B',
-		C = 'C',
-		D = 'D',
-		E = 'E',
-		F = 'F',
-		G = 'G',
-		H = 'H',
-		J = 'J',
-		K = 'K',
-		L = 'L',
-		M = 'M',
-		N = 'N',
-		P = 'P',
-		Q = 'Q',
-		COUNT
-	};
+    static volatile DMA _instance;
+}
 
-	class Name
-	{
-	public:
-		Name(Port port, unsigned int pin);
-		Name();
-
-		Port port;
-		unsigned int pin;
-
-		bool operator==(Name& other);
-	};
-
-	Gpio(Name name);
-
-protected:
-	Name name;
-
-	static const unsigned long portBase[(uint8_t)Port::COUNT];
-	static const unsigned long portPeripheral[(uint8_t)Port::COUNT];
-};
-
-class DigitalInput
-:	public Flow::Component,
-	public Gpio
+DMA::DMA()
 {
-public:
-	Flow::OutPort<bool> outValue;
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_UDMA))
+    {
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_UDMA);
+    }
 
-	DigitalInput(Name name);
+    uDMAEnable();
+    uDMAControlBaseSet(uDmaControlTable);
+}
 
-	void run() final override;
-};
-
-class DigitalOutput
-:	public Flow::Component,
-	public Gpio
-{
-public:
-	Flow::InPort<bool> inValue;
-
-	DigitalOutput(Name name);
-
-	void run() final override;
-};
-
-#endif // TM4C_GPIO_H_
+} // namespace TM4C
+} // namespace Flow

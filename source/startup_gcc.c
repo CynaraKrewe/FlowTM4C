@@ -58,13 +58,13 @@
  * SOLUTION.
  */
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "driverlib/debug.h"
 #include "inc/hw_types.h"
 #include "inc/hw_nvic.h"
 
@@ -77,8 +77,11 @@ static void IntDefaultHandler(void);
 // The entry point for the application.
 extern int main(void);
 
-extern void SysTickIntHandler(void);
-extern void USB0DeviceIntHandler(void);
+extern void isrSysTick(void);
+extern void isrUSB0(void);
+extern void isrADC1Seq3(void);
+extern void isrUART0(void);
+extern void isrGPIOJ(void);
 
 // System stack start determined by the linker script.
 extern unsigned estack __asm("estack");
@@ -103,25 +106,25 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler, // Debug monitor handler
     0,                 // Reserved
     IntDefaultHandler, // The PendSV handler
-    SysTickIntHandler, // The SysTick handler
+    isrSysTick, // The SysTick handler
 	IntDefaultHandler, // GPIO Port A
 	IntDefaultHandler, // GPIO Port B
 	IntDefaultHandler, // GPIO Port C
 	IntDefaultHandler, // GPIO Port D
 	IntDefaultHandler, // GPIO Port E
-	IntDefaultHandler, // UART0 Rx and Tx
+	isrUART0, // UART0 Rx and Tx
 	IntDefaultHandler, // UART1 Rx and Tx
-    IntDefaultHandler, // SSI0 Rx and Tx
+	IntDefaultHandler, // SSI0 Rx and Tx
     IntDefaultHandler, // I2C0 Master and Slave
     IntDefaultHandler, // PWM Fault
     IntDefaultHandler, // PWM Generator 0
     IntDefaultHandler, // PWM Generator 1
     IntDefaultHandler, // PWM Generator 2
     IntDefaultHandler, // Quadrature Encoder 0
-    IntDefaultHandler, // ADC Sequence 0
-    IntDefaultHandler, // ADC Sequence 1
-    IntDefaultHandler, // ADC Sequence 2
-    IntDefaultHandler, // ADC Sequence 3
+    IntDefaultHandler, // ADC0 Sequence 0
+    IntDefaultHandler, // ADC0 Sequence 1
+    IntDefaultHandler, // ADC0 Sequence 2
+    IntDefaultHandler, // ADC0 Sequence 3
     IntDefaultHandler, // Watchdog timer
     IntDefaultHandler, // Timer 0 subtimer A
     IntDefaultHandler, // Timer 0 subtimer B
@@ -146,19 +149,19 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler, // CAN1
 	IntDefaultHandler, // Ethernet
     IntDefaultHandler, // Hibernate
-	USB0DeviceIntHandler, // USB0
+	isrUSB0, // USB0
     IntDefaultHandler, // PWM Generator 3
     IntDefaultHandler, // uDMA Software Transfer
     IntDefaultHandler, // uDMA Error
     IntDefaultHandler, // ADC1 Sequence 0
     IntDefaultHandler, // ADC1 Sequence 1
     IntDefaultHandler, // ADC1 Sequence 2
-    IntDefaultHandler, // ADC1 Sequence 3
+    isrADC1Seq3, // ADC1 Sequence 3
     IntDefaultHandler, // External Bus Interface 0
-	IntDefaultHandler, // GPIO Port J
+    isrGPIOJ, // GPIO Port J
 	IntDefaultHandler, // GPIO Port K
 	IntDefaultHandler, // GPIO Port L
-    IntDefaultHandler, // SSI2 Rx and Tx
+	IntDefaultHandler, // SSI2 Rx and Tx
     IntDefaultHandler, // SSI3 Rx and Tx
 	IntDefaultHandler, // UART3 Rx and Tx
 	IntDefaultHandler, // UART4 Rx and Tx
@@ -180,7 +183,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler, // GPIO Port N
     0,                 // Reserved
     IntDefaultHandler, // Tamper
-	IntDefaultHandler, // GPIO Port P (Summary or P0)
+    IntDefaultHandler, // GPIO Port P (Summary or P0)
 	IntDefaultHandler, // GPIO Port P1
 	IntDefaultHandler, // GPIO Port P2
 	IntDefaultHandler, // GPIO Port P3
@@ -318,7 +321,7 @@ caddr_t _sbrk(int increment)
     static char* currentHeapTop = &heap;
     char* previousHeapTop = currentHeapTop;
 
-    ASSERT(currentHeapTop + increment < &eheap);
+    assert(currentHeapTop + increment < &eheap);
 
     currentHeapTop += increment;
 

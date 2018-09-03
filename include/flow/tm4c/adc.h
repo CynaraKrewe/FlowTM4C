@@ -21,17 +21,20 @@
  * SOLUTION.
  */
 
-#ifndef TM4C_ADC_H_
-#define TM4C_ADC_H_
+#ifndef FLOW_TM4C_ADC_H_
+#define FLOW_TM4C_ADC_H_
 
 #include <stdint.h>
 
-#include "flow/flow.h"
+#include "flow/driver/isr.h"
 
 #include "inc/hw_memmap.h"
 #include "driverlib/sysctl.h"
 
-class Adc: public Flow::Component
+namespace Flow {
+namespace TM4C {
+
+class ADC: public Flow::Component, public Flow::Driver::WithISR
 {
 public:
 	enum class Base : uint8_t
@@ -39,7 +42,6 @@ public:
 		_0 = 0,
 		_1,
 		COUNT
-
 	};
 
 	enum Sequence
@@ -80,29 +82,46 @@ public:
 		Low
 	};
 
+ 	ADC(Number number);
+ 	virtual ~ADC(){}
 
-	Adc();
+protected:
+    void start() override;
+    void stop() override;
 
-	void run();
-
-	Flow::OutPort<uint32_t> sampleAin9;
-	Flow::OutPort<uint32_t> sampleAin0;
-	Flow::OutPort<uint32_t> sampleAin1;
-	Flow::OutPort<uint32_t> sampleAin2;
-	Flow::OutPort<uint32_t> sampleAin3;
-	Flow::OutPort<uint32_t> sampleCpuTemperature;
-
-
-
-
+    uint32_t peripheral() const;
+    uint32_t base() const;
 
 private:
-	uint32_t AdcBuffer[8]; // 8 for Seq0, 1 for Seq3
-	uint32_t AdcTempBuffer[1]; // 8 for Seq0, 1 for Seq3
+    Number number;
 
-	static const uint32_t sysCtlPeripheral[(uint8_t) Number::COUNT];
-	static const uint32_t AdcBase[(uint8_t) Number::COUNT];
+	static const uint32_t _peripheral[(uint8_t)Number::COUNT];
+	static const uint32_t _base[(uint8_t)Number::COUNT];
 };
 
+class ADC1 : public ADC
+{
+public:
+    Flow::InPort<Tick> inTrigger{this};
+    Flow::OutPort<uint32_t> outTemperature;
 
-#endif // TM4C_ADC_H_
+    ADC1();
+    ~ADC1();
+
+    void start() final override;
+    void stop() final override;
+
+    void run() final override;
+
+    void isr() final override;
+
+private:
+    void trigger() final override;
+
+    uint32_t sample[1];
+};
+
+} // namespace TM4C
+} // namespace Flow
+
+#endif // FLOW_TM4C_ADC_H_

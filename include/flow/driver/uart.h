@@ -21,21 +21,59 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_CLOCK_H_
-#define FLOW_TM4C_CLOCK_H_
+#ifndef FLOW_DRIVER_UART_H_
+#define FLOW_DRIVER_UART_H_
 
-#include "flow/driver/clock.h"
+#include "flow/flow.h"
+
+#include "flow/driver/isr.h"
 
 namespace Flow {
-namespace TM4C {
+namespace Driver {
 
-class Clock : public Flow::Driver::Clock<Clock>
+/**
+ * \brief Name space for all UART related classes.
+ *
+ * This contains target agnostic implementations and interfaces
+ * to which target specific peripherals should adhere.
+ */
+namespace UART
+{
+
+class Buffer
 {
 public:
-	void configure(Frequency frequency) final override;
+	Buffer(uint8_t* buffer, uint8_t length) : buffer(buffer), length(length){}
+	uint8_t* buffer;
+	uint8_t length;
 };
 
-} // namespace TM4C
+/**
+ * \brief Interface to be implemented by a target specific UART peripheral.
+ */
+class Peripheral: public Flow::Component, public WithISR
+{
+public:
+	Flow::InPort<char> in{this};
+	Flow::OutPort<char> out;
+
+	virtual ~Peripheral()
+	{
+	}
+
+	/**
+	 * \brief Configure and enable the peripheral.
+	 */
+	virtual void start() = 0;
+
+	/**
+	 * \brief Disable the peripheral.
+	 */
+	virtual void stop() = 0;
+};
+
+} // namespace UART
+} // namespace Driver
 } // namespace Flow
 
-#endif /* FLOW_TM4C_CLOCK_H_ */
+#endif /* FLOW_DRIVER_UART_H_ */

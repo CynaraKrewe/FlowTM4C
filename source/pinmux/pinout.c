@@ -35,8 +35,8 @@
 //
 //*****************************************************************************
 
-// This file was automatically generated on 2-8-2017 at 15:25:56
-// by TI PinMux version 4.0.1496
+// This file was automatically generated on 9/3/2018 at 4:48:57 PM
+// by TI PinMux version 4.0.1519 
 //
 //*****************************************************************************
 
@@ -74,85 +74,57 @@ PinoutSet(void)
     //
 	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
 	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
 	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
-	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
 	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ);
 	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
 	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
-	MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
 
     //
-    // Configure the GPIO Pin Mux for PE3
-	// for AIN0
-    //
-	MAP_GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_3);
-
-    //
-    // Configure the GPIO Pin Mux for PE1
-	// for AIN2
-    //
-	MAP_GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_1);
-
-    //
-    // Configure the GPIO Pin Mux for PE4
-	// for AIN9
-    //
-	MAP_GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_4);
-
-    //
-    // Configure the GPIO Pin Mux for PE2
-	// for AIN1
-    //
-	MAP_GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_2);
-
-    //
-    // Configure the GPIO Pin Mux for PE0
-	// for AIN3
-    //
-	MAP_GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_0);
-
-    //
-    // Configure the GPIO Pin Mux for PC6
-	// for GPIO_PC6
-    //
-	MAP_GPIOPinTypeGPIOOutput(GPIO_PORTC_BASE, GPIO_PIN_6);
-	MAP_GPIOPinWrite(GPIO_PORTC_BASE, GPIO_PIN_6, GPIO_PIN_6);
-
-	//
     // Configure the GPIO Pin Mux for PF0
 	// for M0PWM0
     //
 	MAP_GPIOPinConfigure(GPIO_PF0_M0PWM0);
 	MAP_GPIOPinTypePWM(GPIO_PORTF_BASE, GPIO_PIN_0);
 
+    //
+    // Configure the GPIO Pin Mux for PJ0
+	// for GPIO_PJ0
+    //
+	MAP_GPIOPinTypeGPIOInput(GPIO_PORTJ_BASE, GPIO_PIN_0);
+	MAP_GPIOPadConfigSet(GPIO_PORTJ_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
 
     //
-    // Configure the GPIO Pin Mux for PF4
-	// for GPIO_PF4
+    // Configure the GPIO Pin Mux for PJ1
+	// for GPIO_PJ1
     //
-	MAP_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_4);
-	MAP_GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, 0x0);
-
-    //
-    // Configure the GPIO Pin Mux for PN0
-	// for GPIO_PN0
-    //
-	MAP_GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0);
-	MAP_GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_0, 0x0);
+	MAP_GPIOPinTypeGPIOInput(GPIO_PORTJ_BASE, GPIO_PIN_1);
+	MAP_GPIOPadConfigSet(GPIO_PORTJ_BASE, GPIO_PIN_1, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
 
     //
     // Configure the GPIO Pin Mux for PN1
 	// for GPIO_PN1
     //
 	MAP_GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_1);
-	MAP_GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_1, 0x0);
 
     //
-    // Configure the GPIO Pin Mux for PD0
-	// for GPIO_PD0
+    // Configure the GPIO Pin Mux for PN0
+	// for GPIO_PN0
     //
-	MAP_GPIOPinTypeGPIOInput(GPIO_PORTD_BASE, GPIO_PIN_0);
+	MAP_GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0);
+
+    //
+    // Configure the GPIO Pin Mux for PF4
+	// for GPIO_PF4
+    //
+	MAP_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_4);
+
+    //
+    // Configure the GPIO Pin Mux for PD6
+	// for USB0EPEN
+    //
+	MAP_GPIOPinConfigure(GPIO_PD6_USB0EPEN);
+	MAP_GPIOPinTypeUSBDigital(GPIO_PORTD_BASE, GPIO_PIN_6);
 
     //
     // Configure the GPIO Pin Mux for PL6
@@ -167,38 +139,16 @@ PinoutSet(void)
 	MAP_GPIOPinTypeUSBAnalog(GPIO_PORTL_BASE, GPIO_PIN_7);
 
     //
+    // Configure the GPIO Pin Mux for PB0
+	// for USB0ID
+    //
+	MAP_GPIOPinTypeUSBAnalog(GPIO_PORTB_BASE, GPIO_PIN_0);
+
+    //
     // Configure the GPIO Pin Mux for PB1
 	// for USB0VBUS
     //
 	MAP_GPIOPinTypeUSBAnalog(GPIO_PORTB_BASE, GPIO_PIN_1);
-
-    //
-    // Configure the GPIO Pin Mux for PC4
-	// for U7RX
-    //
-	MAP_GPIOPinConfigure(GPIO_PC4_U7RX);
-	MAP_GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_4);
-
-    //
-    // Configure the GPIO Pin Mux for PC5
-	// for U7TX
-    //
-	MAP_GPIOPinConfigure(GPIO_PC5_U7TX);
-	MAP_GPIOPinTypeUART(GPIO_PORTC_BASE, GPIO_PIN_5);
-
-    //
-    // Configure the GPIO Pin Mux for PP0
-	// for U6RX
-    //
-	MAP_GPIOPinConfigure(GPIO_PP0_U6RX);
-	MAP_GPIOPinTypeUART(GPIO_PORTP_BASE, GPIO_PIN_0);
-
-    //
-    // Configure the GPIO Pin Mux for PP1
-	// for U6TX
-    //
-	MAP_GPIOPinConfigure(GPIO_PP1_U6TX);
-	MAP_GPIOPinTypeUART(GPIO_PORTP_BASE, GPIO_PIN_1);
 
     //
     // Configure the GPIO Pin Mux for PA0
@@ -221,3 +171,5 @@ PinoutSet(void)
 // Close the Doxygen group.
 //! @}
 //
+//*****************************************************************************
+

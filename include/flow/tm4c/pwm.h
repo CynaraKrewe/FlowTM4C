@@ -21,13 +21,16 @@
  * SOLUTION.
  */
 
-#ifndef TM4C_PWM_H_
-#define TM4C_PWM_H_
+#ifndef FLOW_TM4C_PWM_H_
+#define FLOW_TM4C_PWM_H_
 
 #include "flow/flow.h"
-#include "flow/tm4c/frequency.h"
+#include "flow/driver/frequency.h"
 
 #include "driverlib/pwm.h"
+
+namespace Flow {
+namespace TM4C {
 
 class Pwm
 :	public Flow::Component
@@ -42,8 +45,7 @@ private:
 	static constexpr unsigned int OUTPUT_COUNT = (GENERATOR_COUNT * OUTPUT_FOR_GENERATOR);
 
 public:
-	Flow::InPort<Frequency> inFrequencyGenerator[GENERATOR_COUNT];
-	Flow::InPort<DutyCycle> inDutyCycleOutput[OUTPUT_COUNT];
+	Flow::InPort<DutyCycle>* inDutyCycleOutput[OUTPUT_COUNT];
 
 	enum class Divider : uint32_t
 	{
@@ -79,6 +81,9 @@ public:
 	Pwm(Divider divider, Frequency generatorFrequency[GENERATOR_COUNT]);
 	~Pwm();
 
+    void start() final override;
+    void stop() final override;
+
 	void run() final override;
 
 private:
@@ -86,6 +91,12 @@ private:
 	static const Output OUTPUT[OUTPUT_COUNT];
 
 	static unsigned int decodeDivider(Divider divider);
+
+	const Divider divider;
+	Frequency generatorFrequency[GENERATOR_COUNT];
 };
 
-#endif // TM4C_PWM_H_
+} // namespace TM4C
+} // namespace Flow
+
+#endif // FLOW_TM4C_PWM_H_

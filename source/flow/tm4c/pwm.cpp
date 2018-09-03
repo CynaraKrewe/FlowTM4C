@@ -21,43 +21,68 @@
  * SOLUTION.
  */
 
+#include <assert.h>
+
 #include "flow/tm4c/pwm.h"
 #include "flow/tm4c/clock.h"
 
 #include "inc/hw_memmap.h"
 
-#include "driverlib/debug.h"
 #include "driverlib/sysctl.h"
 
+namespace Flow {
+namespace TM4C {
+
 Pwm::Pwm(Divider divider, Frequency generatorFrequency[GENERATOR_COUNT])
+:   divider(divider)
 {
-	SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM0);
+    for(unsigned int g = 0; g < GENERATOR_COUNT; g++)
+    {
+        this->generatorFrequency[g] = generatorFrequency[g];
+    }
 
-	PWMClockSet(PWM0_BASE, (uint32_t)divider);
+    for(unsigned int o = 0; o < OUTPUT_COUNT; o++)
+    {
+        inDutyCycleOutput[o] = new Flow::InPort<DutyCycle>{this};
+    }
 
-	for(unsigned int g = 0; g < GENERATOR_COUNT; g++)
+	while(!SysCtlPeripheralReady(SYSCTL_PERIPH_PWM0))
 	{
-		PWMGenConfigure(PWM0_BASE, (uint32_t)GENERATOR[g],
-				PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC
-				| PWM_GEN_MODE_DBG_STOP | PWM_GEN_MODE_GEN_NO_SYNC
-				| PWM_GEN_MODE_DB_NO_SYNC | PWM_GEN_MODE_FAULT_UNLATCHED
-				| PWM_GEN_MODE_FAULT_NO_MINPER | PWM_GEN_MODE_FAULT_LEGACY);
-
-		PWMGenEnable(PWM0_BASE, (uint32_t)GENERATOR[g]);
-
-		uint16_t value = (uint16_t)(inputClockFrequency / generatorFrequency[g]);
-		PWMGenPeriodSet(PWM0_BASE, (uint32_t)GENERATOR[g], value);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM0);
 	}
-
-	inputClockFrequency = (Frequency)Clock::instance()->getFrequency() / decodeDivider(divider);
 }
 
 Pwm::~Pwm()
 {
-	for(unsigned int g = 0; g < GENERATOR_COUNT; g++)
-	{
-		PWMGenDisable(PWM0_BASE, (uint32_t)GENERATOR[g]);
-	}
+    SysCtlPeripheralDisable(SYSCTL_PERIPH_PWM0);
+}
+
+void Pwm::start()
+{
+    PWMClockSet(PWM0_BASE, (uint32_t)divider);
+    inputClockFrequency = Clock::instance().getFrequency() / decodeDivider(divider);
+
+    for(unsigned int g = 0; g < GENERATOR_COUNT; g++)
+    {
+        PWMGenConfigure(PWM0_BASE, (uint32_t)GENERATOR[g],
+                PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC
+                | PWM_GEN_MODE_DBG_STOP | PWM_GEN_MODE_GEN_NO_SYNC
+                | PWM_GEN_MODE_DB_NO_SYNC | PWM_GEN_MODE_FAULT_UNLATCHED
+                | PWM_GEN_MODE_FAULT_NO_MINPER | PWM_GEN_MODE_FAULT_LEGACY);
+
+        PWMGenEnable(PWM0_BASE, (uint32_t)GENERATOR[g]);
+
+        uint16_t value = (uint16_t)(inputClockFrequency / generatorFrequency[g]);
+        PWMGenPeriodSet(PWM0_BASE, (uint32_t)GENERATOR[g], value);
+    }
+}
+
+void Pwm::stop()
+{
+    for(unsigned int g = 0; g < GENERATOR_COUNT; g++)
+    {
+        PWMGenDisable(PWM0_BASE, (uint32_t)GENERATOR[g]);
+    }
 }
 
 void Pwm::run()
@@ -71,13 +96,14 @@ void Pwm::run()
 			unsigned int output = outputOffset + o;
 
 			DutyCycle dutyCycle;
-			if(inDutyCycleOutput[output].receive(dutyCycle))
+			if(inDutyCycleOutput[output]->receive(dutyCycle))
 			{
-				ASSERT((-0.001f < dutyCycle) && (dutyCycle < 100.001f));
+				assert((-0.001f < dutyCycle) && (dutyCycle < 100.001f));
 				uint32_t period = PWMGenPeriodGet(PWM0_BASE, (uint32_t)GENERATOR[g]);
 				uint32_t threshold = (uint32_t)(((period - 1) * dutyCycle) / 100.0f);
 				PWMPulseWidthSet(PWM0_BASE, (uint32_t)OUTPUT[output], threshold);
 				PWMOutputState(PWM0_BASE, (1 << output), (dutyCycle > 0.0f));
+//				PWMSyncUpdate(PWM0_BASE, PWM_GEN_0_BIT | PWM_GEN_1_BIT | PWM_GEN_2_BIT | PWM_GEN_3_BIT);
 			}
 		}
 	}
@@ -134,3 +160,6 @@ const Pwm::Output Pwm::OUTPUT[OUTPUT_COUNT] =
 	Pwm::Output::_6,
 	Pwm::Output::_7
 };
+
+} // namespace TM4C
+} // namespace Flow

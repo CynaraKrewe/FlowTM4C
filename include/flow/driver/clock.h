@@ -21,21 +21,41 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_CLOCK_H_
-#define FLOW_TM4C_CLOCK_H_
+#ifndef FLOW_DRIVER_CLOCK_H_
+#define FLOW_DRIVER_CLOCK_H_
 
-#include "flow/driver/clock.h"
+#include "frequency.h"
 
 namespace Flow {
-namespace TM4C {
+namespace Driver {
 
-class Clock : public Flow::Driver::Clock<Clock>
+template<typename TargetSpecificClock>
+class Clock
 {
 public:
-	void configure(Frequency frequency) final override;
+    virtual ~Clock(){}
+
+	virtual void configure(Frequency frequency) = 0;
+
+	Frequency getFrequency()
+	{
+	    return frequency;
+	}
+
+	static TargetSpecificClock& instance()
+	{
+	    static TargetSpecificClock _instance;
+
+	    return _instance;
+	}
+
+protected:
+	Frequency frequency;
+
+	Clock(){}
 };
 
-} // namespace TM4C
+} // namespace Driver
 } // namespace Flow
 
-#endif /* FLOW_TM4C_CLOCK_H_ */
+#endif /* FLOW_DRIVER_CLOCK_H_ */

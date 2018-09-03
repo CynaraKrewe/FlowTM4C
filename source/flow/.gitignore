@@ -1,2 +1,5 @@
 /components.cpp
 /flow.cpp
+/platform_cortexm4.cpp
+/platform_cpputest.cpp
+/reactor.cpp

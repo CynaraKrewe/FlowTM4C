@@ -21,18 +21,16 @@
  * SOLUTION.
  */
 
-#ifndef TM4C_UART_H_
-#define TM4C_UART_H_
+#ifndef FLOW_TM4C_UART_H_
+#define FLOW_TM4C_UART_H_
 
-#include <stdint.h>
+#include "flow/driver/uart.h"
 
-#include "flow/flow.h"
+namespace Flow {
+namespace TM4C {
 
-#include "inc/hw_memmap.h"
-#include "driverlib/sysctl.h"
-
-class Uart
-:	public Flow::Component
+class UART
+:	public Flow::Driver::UART::Peripheral
 {
 public:
 	enum class Number : uint8_t
@@ -58,20 +56,33 @@ public:
 		COUNT
 	};
 
-	Flow::OutPort<char> out;
-	Flow::InPort<char> in;
+	UART(Number uartNumber, Baudrate baudRate = Baudrate::_9600);
+	~UART();
 
-	Uart(Number uartNumber, Baudrate baudRate = Baudrate::_9600);
+    void start() final override;
+    void stop() final override;
 
-	void run() final override;
+    void run() final override;
+
+    void trigger() final override;
+    void isr() final override;
 
 protected:
+    uint32_t peripheral() const;
+    uint32_t base() const;
+    uint8_t vector() const;
+
+private:
 	const Number uartNumber;
 	const Baudrate baudRate;
 
-	static const uint32_t sysCtlPeripheral[(uint8_t)Number::COUNT];
-	static const uint32_t uartBase[(uint8_t)Number::COUNT];
+	static const uint32_t _peripheral[(uint8_t)Number::COUNT];
+    static const uint32_t _base[(uint8_t)Number::COUNT];
+    static const uint8_t _vector[(uint8_t)Number::COUNT];
 	static const uint32_t uartBaudrate[(uint8_t)Baudrate::COUNT];
 };
 
-#endif // TM4C_UART_H_
+} // namespace TM4C
+} // namespace Flow
+
+#endif // FLOW_TM4C_UART_H_

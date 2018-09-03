@@ -21,21 +21,35 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_CLOCK_H_
-#define FLOW_TM4C_CLOCK_H_
+#ifndef FLOW_DRIVER_ISR_H_
+#define FLOW_DRIVER_ISR_H_
 
-#include "flow/driver/clock.h"
+#include <stdint.h>
+
+#include "flow/components.h"
 
 namespace Flow {
-namespace TM4C {
+namespace Driver {
 
-class Clock : public Flow::Driver::Clock<Clock>
+class WithISR
 {
 public:
-	void configure(Frequency frequency) final override;
+	virtual ~WithISR()
+	{
+	}
+
+	/**
+	 * \brief The associated interrupt service routine.
+	 */
+	virtual void isr() = 0;
+
+	/**
+	 * \brief Trigger the interrupt so the interrupt service routine will execute.
+	 */
+	virtual void trigger() = 0;
 };
 
-} // namespace TM4C
+} // namespace Driver
 } // namespace Flow
 
-#endif /* FLOW_TM4C_CLOCK_H_ */
+#endif /* FLOW_DRIVER_ISR_H_ */

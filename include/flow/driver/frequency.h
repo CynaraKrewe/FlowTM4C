@@ -21,8 +21,8 @@
  * SOLUTION.
  */
 
-#ifndef FREQUENCY_H_
-#define FREQUENCY_H_
+#ifndef FLOW_DRIVER_FREQUENCY_H_
+#define FLOW_DRIVER_FREQUENCY_H_
 
 #include <stdint.h>
 
@@ -32,4 +32,4 @@
 
 typedef uint32_t Frequency;
 
-#endif /* FREQUENCY_H_ */
+#endif /* FLOW_DRIVER_FREQUENCY_H_ */
