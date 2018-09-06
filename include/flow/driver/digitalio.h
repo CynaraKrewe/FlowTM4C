@@ -163,7 +163,6 @@ public:
         }
 	}
 
-protected:
 	/**
 	 * \brief Set the state of the digital output.
 	 *

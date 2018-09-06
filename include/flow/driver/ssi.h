@@ -212,7 +212,7 @@ public:
 	/**
 	 * \brief The interrupt service routine associated with the SSI bus.
 	 *
-	 * This is the main behavior of the SSI bus & peripheral and should run in interrupt context.
+	 * This is the main behaviour of the SSI bus & peripheral and should run in interrupt context.
 	 * It should be called in the associated interrupt handler.
 	 */
 	void isr() final override
@@ -229,6 +229,9 @@ public:
 					{
 						currentOperation->status = Operation::Status::SUCCESS;
 					}
+
+					currentOperation->slaveSelect.set(false);
+
 					endPoint[currentEndPoint]->send(currentOperation);
 					currentOperation = nullptr;
 				}
@@ -243,6 +246,8 @@ public:
 				{
 					if(endPoint[currentEndPoint]->receive(currentOperation))
 					{
+	                    currentOperation->slaveSelect.set(true);
+
 						if(!peripheral.transceive(currentOperation->transmit,
 						        currentOperation->transmitLength,
 						        currentOperation->receive,
