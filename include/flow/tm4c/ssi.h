@@ -47,7 +47,7 @@ public:
 	Base(Number number);
 	virtual ~Base();
 
-	void trigger() final override;
+	void trigger() override;
 
 protected:
 
@@ -82,11 +82,13 @@ public:
 	void start() final override;
 	void stop() final override;
 
-	bool transceive(const uint8_t* const transmit, uint8_t transmitLength,
-	        uint8_t* const receive, uint8_t receiveLength) final override;
+	bool transceive(const uint8_t* const transmit, uint16_t transmitLength,
+	        uint8_t* const receive, uint16_t receiveLength) final override;
 
 private:
     void isr() final override;
+
+    uint8_t dummy = 0;
 };
 
 } // namespace SSI

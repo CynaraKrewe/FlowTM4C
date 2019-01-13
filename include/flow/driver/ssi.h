@@ -84,8 +84,8 @@ public:
 	 * \return Operation request was successful.
 	 */
 	virtual bool transceive(const uint8_t* const transmit,
-	        uint8_t transmitLength, uint8_t* const receive,
-	        uint8_t receiveLength) = 0;
+	        uint16_t transmitLength, uint8_t* const receive,
+	        uint16_t receiveLength) = 0;
 
 	/**
 	 * \brief Get the peripheral status.
@@ -113,8 +113,9 @@ public:
 	 * \brief Create a SSI operation.
 	 *
 	 * \param slaveSelect The digital output to be asserted during this operation.
+	 * If the FSS signal from the SSI peripheral is used slaveSelect can be omitted.
 	 */
-	Operation(Flow::Driver::Digital::Output& slaveSelect) :
+	Operation(Flow::Driver::Digital::Output* slaveSelect = nullptr) :
 			slaveSelect(slaveSelect)
 	{
 	}
@@ -132,13 +133,13 @@ public:
 	} status = Status::TBD;
 
 	uint8_t* transmit = nullptr;
-	uint8_t transmitLength = 0;
+	uint16_t transmitLength = 0;
 	uint8_t* receive = nullptr;
-	uint8_t receiveLength = 0;
+	uint16_t receiveLength = 0;
 
 	uint32_t tag[4];
 
-	Flow::Driver::Digital::Output& slaveSelect;
+	Flow::Driver::Digital::Output* slaveSelect = nullptr;
 };
 
 /**
@@ -212,7 +213,7 @@ public:
 	/**
 	 * \brief The interrupt service routine associated with the SSI bus.
 	 *
-	 * This is the main behaviour of the SSI bus & peripheral and should run in interrupt context.
+	 * This is the main behavior of the SSI bus & peripheral and should run in interrupt context.
 	 * It should be called in the associated interrupt handler.
 	 */
 	void isr() final override
@@ -230,7 +231,10 @@ public:
 						currentOperation->status = Operation::Status::SUCCESS;
 					}
 
-					currentOperation->slaveSelect.set(false);
+					if(currentOperation->slaveSelect != nullptr)
+					{
+						currentOperation->slaveSelect->set(false);
+					}
 
 					endPoint[currentEndPoint]->send(currentOperation);
 					currentOperation = nullptr;
@@ -246,7 +250,10 @@ public:
 				{
 					if(endPoint[currentEndPoint]->receive(currentOperation))
 					{
-	                    currentOperation->slaveSelect.set(true);
+						if(currentOperation->slaveSelect != nullptr)
+						{
+							currentOperation->slaveSelect->set(true);
+						}
 
 						if(!peripheral.transceive(currentOperation->transmit,
 						        currentOperation->transmitLength,
@@ -299,7 +306,7 @@ public:
 	 *
 	 * \param slaveSelect The slave select to be asserted during operations.
 	 */
-	explicit Slave(Flow::Driver::Digital::Output& slaveSelect) :
+	explicit Slave(Flow::Driver::Digital::Output* slaveSelect = nullptr) :
 			slaveSelect(slaveSelect)
 	{
 	}
@@ -313,7 +320,7 @@ public:
 	{ this };
 
 protected:
-	Flow::Driver::Digital::Output& slaveSelect;
+	Flow::Driver::Digital::Output* slaveSelect = nullptr;
 };
 
 } // namespace Master

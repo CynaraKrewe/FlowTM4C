@@ -25,14 +25,25 @@
 #define FLOW_TM4C_CLOCK_H_
 
 #include "flow/driver/clock.h"
+#include "flow/driver/isr.h"
 
 namespace Flow {
 namespace TM4C {
 
-class Clock : public Flow::Driver::Clock<Clock>
+class Clock :
+		public Flow::Driver::Clock<Clock>,
+		public Flow::Driver::WithISR
 {
 public:
 	void configure(Frequency frequency) final override;
+
+	uint32_t now() const;
+
+	void trigger() final override;
+	void isr() final override;
+
+private:
+	uint32_t _now = 0;
 };
 
 } // namespace TM4C

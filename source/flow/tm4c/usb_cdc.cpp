@@ -55,13 +55,15 @@ UsbCdc::~UsbCdc()
 
 void UsbCdc::start()
 {
-    USBStackModeSet(0, eUSBModeDevice, nullptr);
+    USBStackModeSet(0, eUSBModeForceDevice, nullptr);
 
     uint32_t sysClock = 120 MHz;
     USBDCDFeatureSet(0, USBLIB_FEATURE_CPUCLK, &sysClock);
     uint32_t pll;
     SysCtlVCOGet(SYSCTL_XTAL_25MHZ, &pll);
     USBDCDFeatureSet(0, USBLIB_FEATURE_USBPLL, &pll);
+    uint32_t power = USBLIB_FEATURE_POWER_BUS;
+    USBDCDFeatureSet(0, USBLIB_FEATURE_POWER, &power);
 
     void* device = USBDCDCInit(0, &cdcDevice);
     assert(device != nullptr);

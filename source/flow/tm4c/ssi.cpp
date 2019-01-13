@@ -181,14 +181,12 @@ void Master::start()
     uDMAChannelAssign(dmaReceiveChannelAssign());
     uDMAChannelAssign(dmaTransmitChannelAssign());
 
-    uDMAChannelControlSet(
-            (dmaReceiveChannel() | UDMA_PRI_SELECT),
-            (UDMA_SIZE_8 | UDMA_SRC_INC_NONE | UDMA_DST_INC_8 | UDMA_ARB_4));
+
     uDMAChannelControlSet(
             (dmaTransmitChannel() | UDMA_PRI_SELECT),
             (UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_4));
 
-    SSIIntEnable(base(), (SSI_DMATX | SSI_DMARX));
+    SSIIntEnable(base(), (SSI_DMATX | SSI_TXEOT | SSI_DMARX));
 
     IntEnable(vector());
 
@@ -200,8 +198,8 @@ void Master::stop()
 
 }
 
-bool Master::transceive(const uint8_t* const transmit, uint8_t transmitLength,
-		uint8_t* const receive, uint8_t receiveLength)
+bool Master::transceive(const uint8_t* const transmit, uint16_t transmitLength,
+		uint8_t* const receive, uint16_t receiveLength)
 {
     assert(transmitLength > 0 || receiveLength > 0);
     assert(((transmitLength > 0) ? (transmit != nullptr) : true));
@@ -209,24 +207,54 @@ bool Master::transceive(const uint8_t* const transmit, uint8_t transmitLength,
 
     state = State::BUSY;
 
-    if(receiveLength > 0)
-    {
-        uDMAChannelTransferSet(
-                (dmaReceiveChannel() | UDMA_PRI_SELECT), UDMA_MODE_BASIC,
-                (void*)(base() + SSI_O_DR), (void*)receive, receiveLength);
+    uint32_t dmaEnable = 0;
 
-        uDMAChannelEnable(dmaReceiveChannel());
+    uint16_t transceiveLength = std::max(transmitLength, receiveLength);
+
+    uint32_t control = (UDMA_SIZE_8 | UDMA_SRC_INC_NONE | UDMA_DST_INC_8 | UDMA_ARB_4);
+    const void* receiveBuffer = nullptr;
+
+    if(receiveLength == 0)
+    {
+    	receiveBuffer = &dummy;
+    	control |= UDMA_DST_INC_NONE;
+    }
+    else
+    {
+    	receiveBuffer = receive;
     }
 
-    if(transmitLength > 0)
-    {
-        uDMAChannelTransferSet(
-                (dmaTransmitChannel() | UDMA_PRI_SELECT), UDMA_MODE_BASIC,
-                (void*)transmit, (void*)(base() + SSI_O_DR), transmitLength);
+	uDMAChannelControlSet((dmaReceiveChannel() | UDMA_PRI_SELECT), control);
+    uDMAChannelTransferSet(
+            (dmaReceiveChannel() | UDMA_PRI_SELECT), UDMA_MODE_BASIC,
+            (void*)(base() + SSI_O_DR), (void*)receiveBuffer, transceiveLength);
 
-        uDMAChannelEnable(dmaTransmitChannel());
-        SSIDMAEnable(base(), SSI_DMA_TX);
+    uDMAChannelEnable(dmaReceiveChannel());
+    dmaEnable |= SSI_DMA_RX;
+
+    control = (UDMA_SIZE_8 | UDMA_SRC_INC_8 | UDMA_DST_INC_NONE | UDMA_ARB_4);
+    const void* transmitBuffer = nullptr;
+
+	if(transmitLength == 0)
+    {
+		transmitBuffer = &dummy;
+		control |= UDMA_SRC_INC_NONE;
     }
+	else
+	{
+		transmitBuffer = transmit;
+	}
+
+	uDMAChannelControlSet(
+			(dmaTransmitChannel() | UDMA_PRI_SELECT), control);
+	uDMAChannelTransferSet(
+			(dmaTransmitChannel() | UDMA_PRI_SELECT), UDMA_MODE_BASIC,
+			(void*)transmitBuffer, (void*)(base() + SSI_O_DR), transceiveLength);
+
+	uDMAChannelEnable(dmaTransmitChannel());
+	dmaEnable |= SSI_DMA_TX;
+
+    SSIDMAEnable(base(), dmaEnable);
 
     return true;
 }
@@ -239,20 +267,28 @@ void Master::isr()
     {
         uDMAChannelDisable(dmaTransmitChannel());
         SSIDMADisable(base(), SSI_DMA_TX);
+
+        SSIIntClear(base(), SSI_DMATX);
     }
 
     if(interruptStatus & SSI_DMARX)
     {
         uDMAChannelDisable(dmaReceiveChannel());
+        SSIDMADisable(base(), SSI_DMA_RX);
+
+        SSIIntClear(base(), SSI_DMARX);
     }
 
-    SSIIntClear(base(), interruptStatus);
+    if(interruptStatus & SSI_TXEOT)
+	{
+        SSIIntClear(base(), SSI_TXEOT);
 
-    if(!uDMAChannelIsEnabled(dmaReceiveChannel())
-            && !uDMAChannelIsEnabled(dmaTransmitChannel()))
-    {
-        state = State::IDLE;
-    }
+    	if(!uDMAChannelIsEnabled(dmaReceiveChannel())
+    			&& !uDMAChannelIsEnabled(dmaTransmitChannel()))
+		{
+			state = State::IDLE;
+		}
+	}
 }
 
 } // namespace SSI

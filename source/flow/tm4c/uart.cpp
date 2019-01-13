@@ -60,9 +60,8 @@ void UART::start()
     UARTConfigSetExpClk(base(), coreFrequency, uartBaudrate[(uint8_t)baudRate],
                                 (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                                  UART_CONFIG_PAR_NONE));
-    UARTFIFOEnable(base());
-    UARTFIFOLevelSet(base(), UART_FIFO_TX1_8, UART_FIFO_RX1_8);
-    UARTEnable(base());
+    UARTFIFODisable(base());
+
     UARTIntEnable(base(), (UART_INT_RX | UART_INT_TX));
 
     IntEnable(vector());

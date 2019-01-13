@@ -45,5 +45,19 @@ void Clock::configure(Frequency frequency)
 	SysTickEnable();
 }
 
+uint32_t Clock::now() const
+{
+	return _now;
+}
+
+void Clock::trigger()
+{
+}
+
+void Clock::isr()
+{
+	_now++;
+}
+
 } // namespace TM4C
 } // namespace Flow

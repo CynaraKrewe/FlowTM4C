@@ -50,7 +50,7 @@ public:
 	}
 
 protected:
-	Frequency frequency;
+	Frequency frequency = 0;
 
 	Clock(){}
 };
