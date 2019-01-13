@@ -21,6 +21,7 @@
  * SOLUTION.
  */
 
+#include <algorithm>
 #include <assert.h>
 
 #include "flow/utility.h"
