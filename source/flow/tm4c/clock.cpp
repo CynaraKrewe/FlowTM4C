@@ -31,16 +31,38 @@
 namespace Flow {
 namespace TM4C {
 
-void Clock::configure(Frequency frequency)
+template<>
+void Clock::configure<Device::TM4C129>(Frequency frequency)
 {
 	FPULazyStackingEnable();
 
-	this->frequency = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |
-			SYSCTL_OSC_MAIN |
-			SYSCTL_USE_PLL |
-			SYSCTL_CFG_VCO_480), frequency);
+	this->frequency = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ
+			| SYSCTL_OSC_MAIN
+			| SYSCTL_USE_PLL
+			| SYSCTL_CFG_VCO_480),
+			frequency);
 
-	SysTickPeriodSet(frequency / 1000); // 1ms
+	SysTickPeriodSet(this->frequency / 1000); // 1ms
+	SysTickIntEnable();
+	SysTickEnable();
+}
+
+template<>
+void Clock::configure<Device::TM4C123>(Frequency frequency)
+{
+	FPULazyStackingEnable();
+
+	uint8_t divisor = 200 MHz / frequency;
+
+	assert(2 < divisor && divisor <= 16);
+
+	this->frequency = 200 MHz / divisor;
+
+	SysCtlClockSet((SYSCTL_OSC_INT
+			| SYSCTL_USE_PLL
+			| ((divisor - 1) << 23)));
+
+	SysTickPeriodSet(this->frequency / 1000); // 1ms
 	SysTickIntEnable();
 	SysTickEnable();
 }

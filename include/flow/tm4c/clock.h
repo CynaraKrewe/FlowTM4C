@@ -30,12 +30,15 @@
 namespace Flow {
 namespace TM4C {
 
+enum class Device { TM4C123, TM4C129 };
+
 class Clock :
 		public Flow::Driver::Clock<Clock>,
 		public Flow::Driver::WithISR
 {
 public:
-	void configure(Frequency frequency) final override;
+	template<Device device>
+	void configure(Frequency frequency);
 
 	uint32_t now() const;
 

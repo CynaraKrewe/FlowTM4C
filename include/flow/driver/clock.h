@@ -35,8 +35,6 @@ class Clock
 public:
     virtual ~Clock(){}
 
-	virtual void configure(Frequency frequency) = 0;
-
 	Frequency getFrequency()
 	{
 	    return frequency;
