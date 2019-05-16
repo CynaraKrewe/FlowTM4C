@@ -128,7 +128,7 @@ UsbCdc cdc;
 int main(void)
 {
 	// Set up the clock circuit.
-    Clock::instance().configure(120 MHz);
+    Clock::instance().configure<Device::TM4C129>(120 MHz);
 
 	// Set up the pin mux configuration.
 	PinoutSet();
