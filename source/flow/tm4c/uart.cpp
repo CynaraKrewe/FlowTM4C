@@ -93,11 +93,7 @@ void UART::isr()
 	while(UARTCharsAvail(base()))
 	{
 		// Read the next character from the UART.
-		char received = UARTCharGetNonBlocking(base());
-		if(received >= 0)
-		{
-			out.send(received);
-		}
+		out.send((char)UARTCharGet(base()));
 	}
 
     UARTIntClear(base(), UART_INT_TX);
