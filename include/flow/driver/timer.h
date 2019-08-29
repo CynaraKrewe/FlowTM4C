@@ -1,6 +1,6 @@
 /* The MIT License (MIT)
  *
- * Copyright (c) 2018 Cynara Krewe
+ * Copyright (c) 2019 Cynara Krewe
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software, hardware and associated documentation files (the "Solution"), to deal
@@ -21,39 +21,30 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_DMA_H_
-#define FLOW_TM4C_DMA_H_
+#ifndef FLOW_DRIVER_TIMER_H_
+#define FLOW_DRIVER_TIMER_H_
 
-#include <stdint.h>
+#include "flow/driver/isr.h"
 
 namespace Flow {
-namespace TM4C {
+namespace Driver {
+namespace Timer {
 
-class DMA
+/**
+ * \brief Interface for a single shot timer.
+ */
+class SingleShot :
+		public Flow::Component
 {
 public:
-	static constexpr uint32_t NONE = 32;
+    Flow::InPort<bool> inStart{this};
+    Flow::OutPort<Tick> outTick;
 
-	/**
-	 * \brief Access DMA peripheral.
-	 */
-	static DMA& peripheral();
-
-	/**
-	 * \brief Assign DMA channel to specific peripheral function.
-	 *
-	 * \param channelMapping The channel to peripheral mapping, e.g. UDMA_CH8_UART0RX.
-	 */
-    void assign(uint32_t channelMapping);
-
-private:
-    DMA();
-
-    uint8_t uDmaControlTable[1024] __attribute__ ((aligned(1024)));
-    uint32_t inUse = 0;
+    virtual ~SingleShot(){}
 };
 
-} // namespace TM4C
+} // namespace Timer
+} // namespace Driver
 } // namespace Flow
 
-#endif /* FLOW_TM4C_DMA_H_ */
+#endif /* FLOW_DRIVER_TIMER_H_ */

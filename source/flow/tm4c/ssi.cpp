@@ -173,15 +173,12 @@ void Master::start()
     Frequency coreFrequency = Clock::instance().getFrequency();
     SSIConfigSetExpClk(base(), coreFrequency, SSI_FRF_MOTO_MODE_3, SSI_MODE_MASTER, 2000000, 8);
 
-    DMA::enable();
-
     SSIEnable(base());
 //    SSIAdvFrameHoldEnable(base());
     SSIDMAEnable(base(), (SSI_DMA_TX | SSI_DMA_RX));
 
-    uDMAChannelAssign(dmaReceiveChannelAssign());
-    uDMAChannelAssign(dmaTransmitChannelAssign());
-
+    DMA::peripheral().assign(dmaReceiveChannelAssign());
+    DMA::peripheral().assign(dmaTransmitChannelAssign());
 
     uDMAChannelControlSet(
             (dmaTransmitChannel() | UDMA_PRI_SELECT),

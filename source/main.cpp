@@ -107,11 +107,11 @@ Digital::Output led0{Pin::Port::N, 1, Digital::Polarity::Normal};
 Digital::Interrupt switch1{Pin::Port::J, 1, Digital::Interrupt::Trigger::Change, Digital::Polarity::Inverted};
 Digital::Output led1{Pin::Port::N, 0, Digital::Polarity::Normal};
 
-Timer timerLedBlink{100 /*ms*/};
+SoftwareTimer timerLedBlink{100 /*ms*/};
 Toggle toggle;
 Digital::Output led2{Pin::Port::F, 4, Digital::Polarity::Normal};
 
-Timer timerP{20 /*ms*/};
+SoftwareTimer timerP{20 /*ms*/};
 UpDownCounter<Tick> counterP{0, 30, 0};
 Convert<uint32_t, float> convertP;
 Frequency pwmFrequency[4] = { 1 kHz, 0, 0, 0 };
@@ -119,7 +119,7 @@ Pwm pwmP{Pwm::Divider::_32, pwmFrequency};
 
 ConvertTemperature convertTemperature;
 ADC1 adc1;
-Timer timerTemperature{1000 /*ms*/};
+SoftwareTimer timerTemperature{1000 /*ms*/};
 DrawFrame drawFrame;
 UART uart0{UART::Number::_0, UART::Baudrate::_115200};
 

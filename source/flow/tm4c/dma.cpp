@@ -21,6 +21,8 @@
  * SOLUTION.
  */
 
+#include <assert.h>
+
 #include "flow/tm4c/dma.h"
 
 #include "driverlib/sysctl.h"
@@ -29,13 +31,25 @@
 namespace Flow {
 namespace TM4C {
 
-void DMA::enable()
+DMA& DMA::peripheral()
 {
-    static volatile DMA _instance;
+    static DMA _instance;
+    return _instance;
+}
+
+void DMA::assign(uint32_t channelMapping)
+{
+	assert((inUse & (1 << (channelMapping & 31))) == 0);
+
+	uDMAChannelAssign(channelMapping);
+
+	inUse |= (1 << (channelMapping & 31));
 }
 
 DMA::DMA()
 {
+	SysCtlPeripheralDisable(SYSCTL_PERIPH_UDMA);
+
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_UDMA))
     {
         SysCtlPeripheralEnable(SYSCTL_PERIPH_UDMA);

@@ -1,6 +1,6 @@
 /* The MIT License (MIT)
  *
- * Copyright (c) 2018 Cynara Krewe
+ * Copyright (c) 2019 Cynara Krewe
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software, hardware and associated documentation files (the "Solution"), to deal
@@ -21,39 +21,79 @@
  * SOLUTION.
  */
 
-#ifndef FLOW_TM4C_DMA_H_
-#define FLOW_TM4C_DMA_H_
+#ifndef FLOW_TM4C_TIMER_H_
+#define FLOW_TM4C_TIMER_H_
 
-#include <stdint.h>
+#include "flow/driver/timer.h"
 
 namespace Flow {
 namespace TM4C {
+namespace Timer {
 
-class DMA
+enum class Number :
+		unsigned int
 {
-public:
-	static constexpr uint32_t NONE = 32;
-
-	/**
-	 * \brief Access DMA peripheral.
-	 */
-	static DMA& peripheral();
-
-	/**
-	 * \brief Assign DMA channel to specific peripheral function.
-	 *
-	 * \param channelMapping The channel to peripheral mapping, e.g. UDMA_CH8_UART0RX.
-	 */
-    void assign(uint32_t channelMapping);
-
-private:
-    DMA();
-
-    uint8_t uDmaControlTable[1024] __attribute__ ((aligned(1024)));
-    uint32_t inUse = 0;
+	_0 = 0,
+	_1 = 1,
+	_2 = 2,
+	_3 = 3,
+	_4 = 4,
+	_5 = 5,
+	_6 = 6,
+	_7 = 7,
+	COUNT
 };
 
+enum class Channel :
+		unsigned int
+{
+	A = 0,
+	B = 1,
+	COUNT
+};
+
+class Base
+{
+public:
+	Base(Number number);
+
+protected:
+    Number number() const;
+	uint8_t vector(Channel channel) const;
+	uint32_t peripheral() const;
+	uint32_t base() const;
+
+private:
+	const Number _number;
+	static const uint8_t _vector[(unsigned int)Number::COUNT][(unsigned int)Channel::COUNT];
+	static const uint32_t _peripheral[(unsigned int)Number::COUNT];
+	static const uint32_t _base[(unsigned int)Number::COUNT];
+};
+
+class SingleShot :
+		public Flow::Driver::Timer::SingleShot,
+		public Flow::Driver::WithISR,
+		public Base
+{
+public:
+    SingleShot(Number number, uint16_t periodMs);
+    ~SingleShot();
+
+    void start() final override;
+    void stop() final override;
+
+    void run() override;
+
+    void isr() final override;
+
+private:
+    void trigger() final override;
+
+	uint16_t periodMs;
+};
+
+} // namespace Timer
 } // namespace TM4C
 } // namespace Flow
 
-#endif /* FLOW_TM4C_DMA_H_ */
+#endif /* FLOW_TM4C_TIMER_H_ */
