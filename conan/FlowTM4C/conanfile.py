@@ -5,19 +5,19 @@ import shutil
 
 class FlowTM4C(ConanFile):
 	name = "FlowTM4C"
-	version = "1.6"
+	version = "1.7"
 	description = """Flow compatible drivers for the Texas Intruments TM4C129 microcontroller family."""
 	url = "https://github.com/CynaraKrewe/FlowTM4C"
 	license = "MIT"
 	author = "Mathias Spiessens"
 	build_policy = "missing"
-	requires = "Flow/1.7@spiessensm/stable", "TM4C-usblib/2.1.4.178@spiessensm/stable"
+	requires = "Flow/1.8@spiessensm/stable", "TM4C-usblib/2.1.4.178@spiessensm/stable"
 	
 	def source(self):
-		download("https://github.com/CynaraKrewe/FlowTM4C/archive/v1.6.zip", "FlowTM4C-1.6.zip")
-		unzip("FlowTM4C-1.6.zip")
-		shutil.move("FlowTM4C-1.6", "FlowTM4C")
-		os.unlink("FlowTM4C-1.6.zip")
+		download("https://github.com/CynaraKrewe/FlowTM4C/archive/v1.7.zip", "FlowTM4C-1.7.zip")
+		unzip("FlowTM4C-1.7.zip")
+		shutil.move("FlowTM4C-1.7", "FlowTM4C")
+		os.unlink("FlowTM4C-1.7.zip")
 
 	def build(self):
 		self.output.info("Nothing to build, this package provides sources.")

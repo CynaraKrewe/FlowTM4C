@@ -1,7 +1,7 @@
 from conans import ConanFile
 
 class Flow(ConanFile):
-   requires = "Flow/1.7@spiessensm/stable", "TM4C-usblib/2.1.4.178@spiessensm/stable"
+   requires = "Flow/1.8@spiessensm/stable", "TM4C-usblib/2.1.4.178@spiessensm/stable"
    
    def imports(self):
       self.copy("*.h")
